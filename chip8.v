@@ -1,5 +1,6 @@
-module chip8
+module emulator
 import libretrov as l
+import chip8
 
 #include <stdio.h>
 #include <string.h>
@@ -9,12 +10,12 @@ import libretrov as l
 const (
 	width = 64
 	height = 32
-	pixels = width * height
+	pixels = 2048
 )
 
 struct LibretroCore {
 mut:
-    framebuffer [61440]u16
+    framebuffer [pixels]u16
     log_cb l.Retro_log_printf_t
     environ_cb l.Retro_environment_t
     video_cb l.Retro_video_refresh_t
@@ -22,7 +23,9 @@ mut:
     input_state_cb l.Retro_input_state_t
     audio_cb l.Retro_audio_sample_t
     audio_batch_cb l.Retro_audio_sample_batch_t
+    cpu chip8.CPU
 }
+
 __global(
 	core LibretroCore
 )
