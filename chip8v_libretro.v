@@ -15,7 +15,6 @@ const (
 
 struct LibretroCore {
 mut:
-    framebuffer [pixels]u16
     log_cb l.Retro_log_printf_t
     environ_cb l.Retro_environment_t
     video_cb l.Retro_video_refresh_t
@@ -157,7 +156,7 @@ pub fn retro_set_video_refresh(cb l.Retro_video_refresh_t)
 [export: 'retro_run']
 pub fn retro_run()
 {
-    core.video_cb(voidptr(core.framebuffer), width, height, sizeof(u16)*width)
+    core.video_cb(voidptr(core.cpu.vram), width, height, sizeof(u16)*width)
 }
 
 [export: 'retro_reset']
