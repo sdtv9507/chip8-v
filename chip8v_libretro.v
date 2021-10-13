@@ -109,7 +109,7 @@ pub fn retro_get_system_info(mut info &C.retro_system_info)
 {
     info.library_name = "chip8-v".str
 	info.library_version = "0.1.0".str
-    info.need_fullpath = false
+    info.need_fullpath = true
     info.valid_extensions = "ch8|c8".str
 }
 
