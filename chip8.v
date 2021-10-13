@@ -42,8 +42,12 @@ pub fn retro_cheat_reset(){}
 pub fn retro_cheat_set(index u32, enable bool, core charptr){}
 
 [export: 'retro_load_game']
-pub fn retro_load_game(game &C.retro_game_info) bool
+pub fn retro_load_game(info &C.retro_game_info) bool
 {
+    core.cpu.reset()
+    if info.data != C.NULL {
+        core.cpu.load_cart(string(info.path))
+    }
     return true
 }
 
