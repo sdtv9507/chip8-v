@@ -382,19 +382,3 @@ pub fn (mut cpu CPU) interpret() {
 	if cpu.program_counter >= 4096 {
 	}
 }
-
-                }
-            }
-        }
-        else {
-            //do nothing
-        }
-    }
-    if skip_instruction == true && jump == false {
-        cpu.program_counter += 4
-    } else if jump == false {
-        cpu.program_counter += 2
-    }
-    if cpu.program_counter >= 4096 {
-    }
-}
