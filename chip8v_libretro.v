@@ -15,7 +15,7 @@ const (
 
 struct LibretroCore {
 mut:
-	framebuffer    [2048]byte
+	framebuffer    [32][64]u32
 	log_cb         l.Retro_log_printf_t
 	environ_cb     l.Retro_environment_t
 	video_cb       l.Retro_video_refresh_t
@@ -138,19 +138,25 @@ pub fn retro_set_video_refresh(cb l.Retro_video_refresh_t) {
 
 [export: 'retro_run']
 pub fn retro_run() {
-	core.cpu.interpret()
-	//if core.cpu.update_screen == true {
+	if core.cpu.keypad_wait == true {
+		core.cpu.wait_for_key()
+	} else {
+		core.cpu.interpret()
+	}
+	if core.cpu.update_screen == true {
+		mut val := u32(0)
 		for y in 0 .. 32 {
 			for x in 0 .. 64 {
-			if core.cpu.vram[y][x] == 0 {
-				core.framebuffer[x + y * 64] = 0x00
-			} else {
-				core.framebuffer[x + y * 64] = 0xFF
-			}
+				if core.cpu.vram[y][x] == 0 {
+					val = 0x000000
+				} else {
+					val = 0xFFFFFF
+				}
+				core.framebuffer[y][x] = val
 			}
 		}
 		core.cpu.update_screen = false
-	//}
+	}
 	core.video_cb(voidptr(&core.framebuffer), emulator.width, emulator.height, emulator.width << 2)
 }
 
