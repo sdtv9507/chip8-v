@@ -1,0 +1,20 @@
+# Software Information
+display_name = "Chip-8"
+authors = "sdtv9507"
+supported_extensions = "ch8|c8"
+corename = "chip8-v"
+license = "MIT"
+permissions = ""
+categories = "Emulator"
+display_version = "v0.1.0"
+
+# Hardware Information
+manufacturer = ""
+systemname = "Chip-8"
+systemid = "chip8"
+
+# Libretro Features
+supports_no_game = "false"
+database = ""
+
+description = ""
