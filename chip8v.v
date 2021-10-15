@@ -10,7 +10,7 @@ struct App {
 mut:
 	gg    &gg.Context = 0
 	scale int = 10
-	cpu chip8.CPU
+	cpu   chip8.CPU
 }
 
 fn main() {
@@ -29,7 +29,7 @@ fn main() {
 	)
 	app.cpu = chip8.CPU{}
 	app.cpu.reset()
-	if arg != "" {
+	if arg != '' {
 		app.cpu.load_cart(arg)
 	} else {
 		exit(0)
@@ -47,19 +47,18 @@ fn frame(mut app App) {
 			exit(0)
 		}
 	}
-	//if app.cpu.update_screen == true {
-		mut x := 0
-		mut y := 0
-		for i in 0 .. 2048 {
-			x = i % 64
-			y = i / 32
-			if app.cpu.vram[i] == 0 {
+	//Has to be updated every frame
+	// if app.cpu.update_screen == true {
+	for y in 0 .. 32 {
+		for x in 0 .. 64 {
+			if app.cpu.vram[y][x] == 0 {
 				app.gg.draw_rect(x * app.scale, y * app.scale, app.scale, app.scale, gx.black)
 			} else {
 				app.gg.draw_rect(x * app.scale, y * app.scale, app.scale, app.scale, gx.white)
 			}
 		}
-		app.cpu.update_screen = false
+	}
+	app.cpu.update_screen = false
 	//}
 	time.sleep(16 * time.millisecond)
 	app.gg.end()

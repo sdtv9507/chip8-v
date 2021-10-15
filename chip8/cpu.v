@@ -23,7 +23,7 @@ pub mut:
 	keypad           [16]byte
 	stack            [16]usize
 	stack_pointer    usize
-	vram             [2048]byte
+	vram             [32][64]byte
 	update_screen    bool
 	keypad_wait      bool
 	keypad_reg       usize
@@ -42,8 +42,10 @@ pub fn (mut cpu CPU) reset() {
 	for i in 0 .. 16 {
 		cpu.stack[i] = 0
 	}
-	for i in 0 .. 2048 {
-		cpu.vram[i] = 0
+	for y in 0 .. 32 {
+		for x in 0 .. 64 {
+			cpu.vram[y][x] = 0
+		}
 	}
 	cpu.address_register = u16(0)
 	cpu.program_counter = usize(0x200)
@@ -170,8 +172,10 @@ pub fn (mut cpu CPU) interpret() bool {
 		0x0000 {
 			match instruction & 0x0FFF {
 				0x00E0 {
-					for i in 0 .. 2048 {
-						cpu.vram[i] = 0
+					for y in 0 .. 32 {
+						for x in 0 .. 64 {
+							cpu.vram[y][x] = 0
+						}
 					}
 					cpu.update_screen = true
 				}
@@ -303,11 +307,10 @@ pub fn (mut cpu CPU) interpret() bool {
 					x = cpu.registers[reg_x] + x_pos
 					x %= 64
 					color := (data >> (7 - x_pos)) & 1
-					position := x + y * 32
-					if color & cpu.vram[position] == 1 {
+					if color & cpu.vram[y][x] == 1 {
 						cpu.registers[0xF] = 1
 					}
-					cpu.vram[position] ^= color
+					cpu.vram[y][x] ^= color
 				}
 			}
 			cpu.update_screen = true
@@ -384,8 +387,7 @@ pub fn (mut cpu CPU) interpret() bool {
 	return true
 }
 
-pub fn (mut cpu CPU) wait_for_key()
-{
+pub fn (mut cpu CPU) wait_for_key() {
 	for i in 0 .. 16 {
 		if cpu.keypad[i] == 1 {
 			cpu.keypad_wait = false

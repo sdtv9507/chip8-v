@@ -139,16 +139,18 @@ pub fn retro_set_video_refresh(cb l.Retro_video_refresh_t) {
 [export: 'retro_run']
 pub fn retro_run() {
 	core.cpu.interpret()
-	if core.cpu.update_screen == true {
-		for i in 0 .. 2048 {
-			if core.cpu.vram[i] == 0 {
-				core.framebuffer[i] = 0x00
+	//if core.cpu.update_screen == true {
+		for y in 0 .. 32 {
+			for x in 0 .. 64 {
+			if core.cpu.vram[y][x] == 0 {
+				core.framebuffer[x + y * 64] = 0x00
 			} else {
-				core.framebuffer[i] = 0xFF
+				core.framebuffer[x + y * 64] = 0xFF
+			}
 			}
 		}
 		core.cpu.update_screen = false
-	}
+	//}
 	core.video_cb(voidptr(&core.framebuffer), emulator.width, emulator.height, emulator.width << 2)
 }
 
