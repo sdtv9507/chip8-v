@@ -138,6 +138,7 @@ pub fn retro_set_video_refresh(cb l.Retro_video_refresh_t) {
 
 [export: 'retro_run']
 pub fn retro_run() {
+	poll_input()
 	if core.cpu.keypad_wait == true {
 		core.cpu.wait_for_key()
 	} else {
@@ -180,4 +181,19 @@ pub fn retro_set_input_poll(cb l.Retro_input_poll_t) {
 [export: 'retro_set_input_state']
 pub fn retro_set_input_state(cb l.Retro_input_state_t) {
 	core.input_state_cb = cb
+}
+
+pub fn poll_input() {
+	mut state := 0
+	key_codes := [l.Retro_key.retrok_1, l.Retro_key.retrok_2, l.Retro_key.retrok_3,
+		l.Retro_key.retrok_q, l.Retro_key.retrok_w, l.Retro_key.retrok_e, l.Retro_key.retrok_a,
+		l.Retro_key.retrok_s, l.Retro_key.retrok_d, l.Retro_key.retrok_x, l.Retro_key.retrok_z,
+		l.Retro_key.retrok_c, l.Retro_key.retrok_4, l.Retro_key.retrok_r, l.Retro_key.retrok_f,
+		l.Retro_key.retrok_v]
+	mut keys := 0x0
+	for i in 0 .. 16 {
+		state = core.input_state_cb(0, l.retro_device_keyboard, 0, key_codes[i])
+		core.cpu.set_key(keys, byte(state))
+		keys += 1
+	}
 }
