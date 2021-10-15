@@ -387,6 +387,10 @@ pub fn (mut cpu CPU) interpret() bool {
 	return true
 }
 
+pub fn (mut cpu CPU) set_key(index int, state byte) {
+	cpu.keypad[index] = state
+}
+
 pub fn (mut cpu CPU) wait_for_key() {
 	for i in 0 .. 16 {
 		if cpu.keypad[i] == 1 {

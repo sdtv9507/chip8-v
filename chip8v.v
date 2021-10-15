@@ -25,6 +25,7 @@ fn main() {
 		create_window: true
 		window_title: 'Chip-8'
 		frame_fn: frame
+		event_fn: on_event
 		user_data: app
 	)
 	app.cpu = chip8.CPU{}
@@ -62,4 +63,125 @@ fn frame(mut app App) {
 	//}
 	time.sleep(16 * time.millisecond)
 	app.gg.end()
+}
+
+fn on_event(e &gg.Event, mut app App) {
+	if e.typ == .key_down {
+		app.key_down(e.key_code)
+	} else if e.typ == .key_up {
+		app.key_up(e.key_code)
+	}
+}
+
+fn (mut app App) key_down(key gg.KeyCode) {
+	state := byte(1)
+	match key {
+		.escape {
+			exit(0)
+		}
+		._1 {
+			app.cpu.set_key(0x1, state)
+		}
+		._2 {
+			app.cpu.set_key(0x2, state)
+		}
+		._3 {
+			app.cpu.set_key(0x3, state)
+		}
+		._4 {
+			app.cpu.set_key(0xC, state)
+		}
+		.q {
+			app.cpu.set_key(0x4, state)
+		}
+		.w {
+			app.cpu.set_key(0x5, state)
+		}
+		.e {
+			app.cpu.set_key(0x6, state)
+		}
+		.r {
+			app.cpu.set_key(0xD, state)
+		}
+		.a {
+			app.cpu.set_key(0x7, state)
+		}
+		.s {
+			app.cpu.set_key(0x8, state)
+		}
+		.d {
+			app.cpu.set_key(0x9, state)
+		}
+		.f {
+			app.cpu.set_key(0xE, state)
+		}
+		.z {
+			app.cpu.set_key(0xA, state)
+		}
+		.x {
+			app.cpu.set_key(0x0, state)
+		}
+		.c {
+			app.cpu.set_key(0xB, state)
+		}
+		.v {
+			app.cpu.set_key(0xF, state)
+		}
+		else {}
+	}
+}
+
+fn (mut app App) key_up(key gg.KeyCode) {
+	state := byte(0)
+	match key {
+		._1 {
+			app.cpu.set_key(0x1, state)
+		}
+		._2 {
+			app.cpu.set_key(0x2, state)
+		}
+		._3 {
+			app.cpu.set_key(0x3, state)
+		}
+		._4 {
+			app.cpu.set_key(0xC, state)
+		}
+		.q {
+			app.cpu.set_key(0x4, state)
+		}
+		.w {
+			app.cpu.set_key(0x5, state)
+		}
+		.e {
+			app.cpu.set_key(0x6, state)
+		}
+		.r {
+			app.cpu.set_key(0xD, state)
+		}
+		.a {
+			app.cpu.set_key(0x7, state)
+		}
+		.s {
+			app.cpu.set_key(0x8, state)
+		}
+		.d {
+			app.cpu.set_key(0x9, state)
+		}
+		.f {
+			app.cpu.set_key(0xE, state)
+		}
+		.z {
+			app.cpu.set_key(0xA, state)
+		}
+		.x {
+			app.cpu.set_key(0x0, state)
+		}
+		.c {
+			app.cpu.set_key(0xB, state)
+		}
+		.v {
+			app.cpu.set_key(0xF, state)
+		}
+		else {}
+	}
 }
