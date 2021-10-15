@@ -158,6 +158,9 @@ pub fn retro_run() {
 		}
 		core.cpu.update_screen = false
 	}
+	for i := 0; i < 735; i += 1 {
+		core.audio_cb(1, 1)
+	}
 	core.video_cb(voidptr(&core.framebuffer), emulator.width, emulator.height, emulator.width << 2)
 }
 
