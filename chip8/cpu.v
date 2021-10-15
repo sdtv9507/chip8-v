@@ -153,7 +153,7 @@ fn (cpu CPU) get_instruction() u16 {
 	return u16((lo << 8) | hi)
 }
 
-pub fn (mut cpu CPU) interpret() {
+pub fn (mut cpu CPU) interpret() bool {
 	if cpu.delay_timer > 0 {
 		cpu.delay_timer -= 1
 	}
@@ -181,7 +181,7 @@ pub fn (mut cpu CPU) interpret() {
 					jump = true
 				}
 				else {
-					// Do nothing
+					return false
 				}
 			}
 		}
@@ -270,7 +270,7 @@ pub fn (mut cpu CPU) interpret() {
 					cpu.registers[reg_x] = cpu.registers[reg_x] << 1
 				}
 				else {
-					// do nothing
+					return false
 				}
 			}
 		}
@@ -325,7 +325,7 @@ pub fn (mut cpu CPU) interpret() {
 					}
 				}
 				else {
-					// do nothing
+					return false
 				}
 			}
 		}
@@ -366,12 +366,12 @@ pub fn (mut cpu CPU) interpret() {
 					}
 				}
 				else {
-					// do nothing
+					return false
 				}
 			}
 		}
 		else {
-			// do nothing
+			return false
 		}
 	}
 	if skip_instruction == true && jump == false {
@@ -380,5 +380,17 @@ pub fn (mut cpu CPU) interpret() {
 		cpu.program_counter += 2
 	}
 	if cpu.program_counter >= 4096 {
+	}
+	return true
+}
+
+pub fn (mut cpu CPU) wait_for_key()
+{
+	for i in 0 .. 16 {
+		if cpu.keypad[i] == 1 {
+			cpu.keypad_wait = false
+			cpu.registers[cpu.keypad_reg] = byte(i)
+			break
+		}
 	}
 }
