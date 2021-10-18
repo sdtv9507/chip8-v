@@ -39,17 +39,17 @@ pub fn retro_api_version() u32 {
 pub fn retro_cheat_reset() {}
 
 [export: 'retro_cheat_set']
-pub fn retro_cheat_set(index u32, enable bool, core &char) {}
+pub fn retro_cheat_set(index u32, enable bool, const_core &char) {}
 
 [export: 'retro_load_game']
-pub fn retro_load_game(info &C.retro_game_info) bool {
+pub fn retro_load_game(const_info &C.retro_game_info) bool {
 	core.cpu.reset()
-	core.cpu.load_cart(string(info.path))
+	core.cpu.load_cart(string(const_info.path))
 	return true
 }
 
 [export: 'retro_load_game_special']
-pub fn retro_load_game_special(game_type u32, info &C.retro_game_info, num_info usize) bool {
+pub fn retro_load_game_special(game_type u32, const_info &C.retro_game_info, num_info usize) bool {
 	return false
 }
 
@@ -85,34 +85,34 @@ pub fn retro_serialize_size() usize {
 }
 
 [export: 'retro_serialize']
-pub fn retro_serialize(mut data voidptr, size usize) bool {
+pub fn retro_serialize(data voidptr, size usize) bool {
 	return false
 }
 
 [export: 'retro_unserialize']
-pub fn retro_unserialize(data voidptr, size usize) bool {
+pub fn retro_unserialize(const_data &C.void, size usize) bool {
 	return false
 }
 
 [export: 'retro_get_system_info']
-pub fn retro_get_system_info(mut info C.retro_system_info) {
-	info.library_name = 'chip8-v'.str
-	info.library_version = '0.1.0'.str
-	info.need_fullpath = true
-	info.valid_extensions = 'ch8|c8'.str
+pub fn retro_get_system_info(mut const_info C.retro_system_info) {
+	const_info.library_name = 'chip8-v'.str
+	const_info.library_version = '0.1.0'.str
+	const_info.need_fullpath = true
+	const_info.valid_extensions = 'ch8|c8'.str
 }
 
 [export: 'retro_get_system_av_info']
-pub fn retro_get_system_av_info(mut info C.retro_system_av_info) {
+pub fn retro_get_system_av_info(mut const_info C.retro_system_av_info) {
 	pixel_format := l.Retro_pixel_format.retro_pixel_format_xrgb8888
-	unsafe { C.memset(info, 0, sizeof(info)) }
-	info.timing.fps = 60.0
-	info.timing.sample_rate = 44100
-	info.geometry.base_width = emulator.width
-	info.geometry.base_height = emulator.height
-	info.geometry.max_width = emulator.width
-	info.geometry.max_height = emulator.height
-	info.geometry.aspect_ratio = emulator.width / emulator.height
+	unsafe { C.memset(const_info, 0, sizeof(const_info)) }
+	const_info.timing.fps = 60.0
+	const_info.timing.sample_rate = 44100
+	const_info.geometry.base_width = emulator.width
+	const_info.geometry.base_height = emulator.height
+	const_info.geometry.max_width = emulator.width
+	const_info.geometry.max_height = emulator.height
+	const_info.geometry.aspect_ratio = emulator.width / emulator.height
 	core.environ_cb(u32(l.retro_environment_set_pixel_format), &pixel_format)
 }
 
@@ -132,7 +132,7 @@ pub fn retro_deinit() {
 }
 
 [export: 'retro_set_video_refresh']
-pub fn retro_set_video_refresh(cb l.Retro_video_refresh_t) {
+pub fn retro_set_video_refresh(cb C.retro_video_refresh_t) {
 	core.video_cb = cb
 }
 
@@ -169,7 +169,7 @@ pub fn retro_reset() {
 }
 
 [export: 'retro_set_audio_sample_batch']
-pub fn retro_set_audio_sample_batch(cb l.Retro_audio_sample_batch_t) {}
+pub fn retro_set_audio_sample_batch(cb C.retro_audio_sample_batch_t) {}
 
 [export: 'retro_set_audio_sample']
 pub fn retro_set_audio_sample(cb l.Retro_audio_sample_t) {
