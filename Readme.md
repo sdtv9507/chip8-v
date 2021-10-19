@@ -5,7 +5,7 @@ Doesn't have audio yet.
 ## Compiling from source
 
 ### Standalone
-*Requieres OpenGL 3.3
+*OpenGL 3.3
 ```sh
 v chip8v.v
 ```
@@ -16,7 +16,7 @@ chip8v path/to/my/rom
 
 ### Libretro Core
 ```sh
-v chip8v_libretro.v -shared -enable-globals -cc tccbin
+v chip8v_libretro.v -shared -enable-globals -cc gcc
 ```
 Copy the core file to Retroarch's core folder
 Copy chip8v_libretro.info to Retroarch's info folder
