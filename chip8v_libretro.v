@@ -6,11 +6,15 @@ import chip8
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
+
+fn C.sinf(u32) u32
 
 const (
 	width  = 64
 	height = 32
 	pixels = 2048
+	m_pi = 3.14159265358979323846
 )
 
 struct LibretroCore {
@@ -24,6 +28,7 @@ mut:
 	audio_cb       l.Retro_audio_sample_t
 	audio_batch_cb l.Retro_audio_sample_batch_t
 	cpu            chip8.CPU
+	phase u32
 }
 
 __global (
@@ -158,9 +163,7 @@ pub fn retro_run() {
 		}
 		core.cpu.update_screen = false
 	}
-	for i := 0; i < 735; i += 1 {
-		core.audio_cb(1, 1)
-	}
+	audio_callback()
 	core.video_cb(voidptr(&core.framebuffer), emulator.width, emulator.height, emulator.width << 2)
 }
 
@@ -198,5 +201,17 @@ pub fn poll_input() {
 		state = core.input_state_cb(0, l.retro_device_keyboard, 0, key_codes[i])
 		core.cpu.set_key(keys, byte(state))
 		keys += 1
+	}
+}
+
+// Formula from https://github.com/libretro/emux
+fn audio_callback() {
+	for i := 0; i < 735; i += 1 {
+		mut val := 0x7FFF * C.sinf(2 * m_pi * 440 * (f32(core.phase) / 44100.0))
+		core.phase += 1
+		if core.cpu.sound_timer <= 0 {
+			val = 1
+		}
+		core.audio_cb(val, val)
 	}
 }
