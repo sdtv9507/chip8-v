@@ -24,6 +24,7 @@ fn main() {
 	title := 'Chip8-v'
 	width := 640
 	height := 320
+	
 	mut app := &App{
 		screen: vsdl2.create_rgb_surface(0, width, height, 32, 0x00FF0000, 0x0000FF00,
 			0x000000FF, 0xFF000000)
@@ -36,12 +37,14 @@ fn main() {
 		exit(0)
 	}
 	app.quit = false
+
 	C.SDL_Init(C.SDL_INIT_VIDEO | C.SDL_INIT_AUDIO | C.SDL_INIT_JOYSTICK)
 	C.atexit(C.SDL_Quit)
 	vsdl2.create_window_and_renderer(width, height, 0, &app.window, &app.renderer)
 	C.SDL_SetWindowTitle(app.window, title.str)
 	app.texture = C.SDL_CreateTexture(app.renderer, C.SDL_PIXELFORMAT_XRGB8888, C.SDL_TEXTUREACCESS_STREAMING,
 		width, height)
+	
 	for !app.quit {
 		C.SDL_RenderClear(app.renderer)
 		ev := vsdl2.Event{}
@@ -65,6 +68,7 @@ fn loop_cpu(mut app App) {
 			app.quit = true
 		}
 	}
+	
 	if app.cpu.update_screen == true {
 		for y in 0 .. 32 {
 			for x in 0 .. 64 {
@@ -88,122 +92,128 @@ fn poll_events(ev vsdl2.Event, mut app App) {
 			C.SDL_QUIT {
 				app.quit = true
 			}
+			C.SDL_KEYDOWN {
+				key := unsafe { ev.key.keysym.sym }
+				app.key_down(key)
+			}
+			C.SDL_KEYUP {
+				key := unsafe { ev.key.keysym.sym }
+				app.key_up(key)
+			}
 			else {}
 		}
 	}
 }
 
-/*
-fn (mut app App) key_down(key gg.KeyCode) {
+fn (mut app App) key_down(key int) {
 	state := byte(1)
 	match key {
-		.escape {
-			exit(0)
+		C.SDLK_ESCAPE {
+			app.quit = true
 		}
-		._1 {
+		C.SDLK_1 {
 			app.cpu.set_key(0x1, state)
 		}
-		._2 {
+		C.SDLK_2 {
 			app.cpu.set_key(0x2, state)
 		}
-		._3 {
+		C.SDLK_3 {
 			app.cpu.set_key(0x3, state)
 		}
-		._4 {
+		C.SDLK_4 {
 			app.cpu.set_key(0xC, state)
 		}
-		.q {
+		C.SDLK_q {
 			app.cpu.set_key(0x4, state)
 		}
-		.w {
+		C.SDLK_w {
 			app.cpu.set_key(0x5, state)
 		}
-		.e {
+		C.SDLK_e {
 			app.cpu.set_key(0x6, state)
 		}
-		.r {
+		C.SDLK_r {
 			app.cpu.set_key(0xD, state)
 		}
-		.a {
+		C.SDLK_a {
 			app.cpu.set_key(0x7, state)
 		}
-		.s {
+		C.SDLK_s {
 			app.cpu.set_key(0x8, state)
 		}
-		.d {
+		C.SDLK_d {
 			app.cpu.set_key(0x9, state)
 		}
-		.f {
+		C.SDLK_f {
 			app.cpu.set_key(0xE, state)
 		}
-		.z {
+		C.SDLK_z {
 			app.cpu.set_key(0xA, state)
 		}
-		.x {
+		C.SDLK_x {
 			app.cpu.set_key(0x0, state)
 		}
-		.c {
+		C.SDLK_c {
 			app.cpu.set_key(0xB, state)
 		}
-		.v {
+		C.SDLK_v {
 			app.cpu.set_key(0xF, state)
 		}
 		else {}
 	}
 }
 
-fn (mut app App) key_up(key gg.KeyCode) {
+fn (mut app App) key_up(key int) {
 	state := byte(0)
 	match key {
-		._1 {
+		C.SDLK_1 {
 			app.cpu.set_key(0x1, state)
 		}
-		._2 {
+		C.SDLK_2 {
 			app.cpu.set_key(0x2, state)
 		}
-		._3 {
+		C.SDLK_3 {
 			app.cpu.set_key(0x3, state)
 		}
-		._4 {
+		C.SDLK_4 {
 			app.cpu.set_key(0xC, state)
 		}
-		.q {
+		C.SDLK_q {
 			app.cpu.set_key(0x4, state)
 		}
-		.w {
+		C.SDLK_w {
 			app.cpu.set_key(0x5, state)
 		}
-		.e {
+		C.SDLK_e {
 			app.cpu.set_key(0x6, state)
 		}
-		.r {
+		C.SDLK_r {
 			app.cpu.set_key(0xD, state)
 		}
-		.a {
+		C.SDLK_a {
 			app.cpu.set_key(0x7, state)
 		}
-		.s {
+		C.SDLK_s {
 			app.cpu.set_key(0x8, state)
 		}
-		.d {
+		C.SDLK_d {
 			app.cpu.set_key(0x9, state)
 		}
-		.f {
+		C.SDLK_f {
 			app.cpu.set_key(0xE, state)
 		}
-		.z {
+		C.SDLK_z {
 			app.cpu.set_key(0xA, state)
 		}
-		.x {
+		C.SDLK_x {
 			app.cpu.set_key(0x0, state)
 		}
-		.c {
+		C.SDLK_c {
 			app.cpu.set_key(0xB, state)
 		}
-		.v {
+		C.SDLK_v {
 			app.cpu.set_key(0xF, state)
 		}
 		else {}
 	}
 }
-*/
