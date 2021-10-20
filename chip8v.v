@@ -1,16 +1,19 @@
 module main
 
 import chip8
-import gg
-import gx
 import os
 import time
+import nsauzede.vsdl2
 
 struct App {
 mut:
-	gg    &gg.Context = 0
-	scale int = 10
-	cpu   chip8.CPU
+	cpu      chip8.CPU
+	scale    int = 10
+	window   voidptr
+	renderer voidptr
+	screen   &vsdl2.Surface
+	texture  voidptr
+	quit     bool
 }
 
 fn main() {
@@ -18,16 +21,13 @@ fn main() {
 	if os.args.len > 1 {
 		arg = os.args[1]
 	}
-	mut app := &App{}
-	app.gg = gg.new_context(
-		width: 640
-		height: 320
-		create_window: true
-		window_title: 'Chip-8'
-		frame_fn: frame
-		event_fn: on_event
-		user_data: app
-	)
+	title := 'Chip8-v'
+	width := 640
+	height := 320
+	mut app := &App{
+		screen: vsdl2.create_rgb_surface(0, width, height, 32, 0x00FF0000, 0x0000FF00,
+			0x000000FF, 0xFF000000)
+	}
 	app.cpu = chip8.CPU{}
 	app.cpu.reset()
 	if arg != '' {
@@ -35,44 +35,65 @@ fn main() {
 	} else {
 		exit(0)
 	}
-	app.gg.run()
+	app.quit = false
+	C.SDL_Init(C.SDL_INIT_VIDEO | C.SDL_INIT_AUDIO | C.SDL_INIT_JOYSTICK)
+	C.atexit(C.SDL_Quit)
+	vsdl2.create_window_and_renderer(width, height, 0, &app.window, &app.renderer)
+	C.SDL_SetWindowTitle(app.window, title.str)
+	app.texture = C.SDL_CreateTexture(app.renderer, C.SDL_PIXELFORMAT_XRGB8888, C.SDL_TEXTUREACCESS_STREAMING,
+		width, height)
+	for !app.quit {
+		C.SDL_RenderClear(app.renderer)
+		ev := vsdl2.Event{}
+		poll_events(ev, mut app)
+		loop_cpu(mut app)
+
+		C.SDL_UpdateTexture(app.texture, 0, app.screen.pixels, app.screen.pitch)
+		C.SDL_RenderClear(app.renderer)
+		C.SDL_RenderCopy(app.renderer, app.texture, 0, 0)
+		C.SDL_RenderPresent(app.renderer)
+		vsdl2.delay(16)
+	}
 }
 
-fn frame(mut app App) {
-	app.gg.begin()
+fn loop_cpu(mut app App) {
 	if app.cpu.keypad_wait == true {
 		app.cpu.wait_for_key()
 	} else {
 		result := app.cpu.interpret()
 		if result == false {
-			exit(0)
+			app.quit = true
 		}
 	}
-	//Has to be updated every frame
-	// if app.cpu.update_screen == true {
-	for y in 0 .. 32 {
-		for x in 0 .. 64 {
-			if app.cpu.vram[y][x] == 0 {
-				app.gg.draw_rect(x * app.scale, y * app.scale, app.scale, app.scale, gx.black)
-			} else {
-				app.gg.draw_rect(x * app.scale, y * app.scale, app.scale, app.scale, gx.white)
+	if app.cpu.update_screen == true {
+		for y in 0 .. 32 {
+			for x in 0 .. 64 {
+				mut rect := vsdl2.Rect{x * app.scale, y * app.scale, app.scale, app.scale}
+				if app.cpu.vram[y][x] == 0 {
+					color := vsdl2.Color{byte(0), byte(0), byte(0), byte(255)}
+					vsdl2.fill_rect(app.screen, rect, color)
+				} else {
+					color := vsdl2.Color{byte(255), byte(255), byte(255), byte(255)}
+					vsdl2.fill_rect(app.screen, rect, color)
+				}
 			}
 		}
-	}
-	app.cpu.update_screen = false
-	//}
-	time.sleep(16 * time.millisecond)
-	app.gg.end()
-}
-
-fn on_event(e &gg.Event, mut app App) {
-	if e.typ == .key_down {
-		app.key_down(e.key_code)
-	} else if e.typ == .key_up {
-		app.key_up(e.key_code)
+		app.cpu.update_screen = false
 	}
 }
 
+fn poll_events(ev vsdl2.Event, mut app App) {
+	for 0 < vsdl2.poll_event(&ev) {
+		match int(unsafe { ev.@type }) {
+			C.SDL_QUIT {
+				app.quit = true
+			}
+			else {}
+		}
+	}
+}
+
+/*
 fn (mut app App) key_down(key gg.KeyCode) {
 	state := byte(1)
 	match key {
@@ -185,3 +206,4 @@ fn (mut app App) key_up(key gg.KeyCode) {
 		else {}
 	}
 }
+*/
