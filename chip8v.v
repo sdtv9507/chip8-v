@@ -2,13 +2,13 @@ module main
 
 import chip8
 import os
-import time
 import nsauzede.vsdl2
 
 struct App {
 mut:
 	cpu      chip8.CPU
 	scale    int = 10
+	delay u32 = u32(16)
 	window   voidptr
 	renderer voidptr
 	screen   &vsdl2.Surface
@@ -55,7 +55,7 @@ fn main() {
 		C.SDL_RenderClear(app.renderer)
 		C.SDL_RenderCopy(app.renderer, app.texture, 0, 0)
 		C.SDL_RenderPresent(app.renderer)
-		vsdl2.delay(16)
+		vsdl2.delay(app.delay)
 	}
 }
 
@@ -158,6 +158,16 @@ fn (mut app App) key_down(key int) {
 		}
 		C.SDLK_v {
 			app.cpu.set_key(0xF, state)
+		}
+		C.SDLK_i {
+			if app.delay < 60 {
+				app.delay += 1
+			}
+		}
+		C.SDLK_o {
+			if app.delay > 1 {
+				app.delay -= 1
+			}
 		}
 		else {}
 	}
