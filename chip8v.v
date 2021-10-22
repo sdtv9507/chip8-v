@@ -5,12 +5,19 @@ import gg
 import gx
 import os
 import time
+import math
+import sokol.audio
+
+const (
+	m_pi = 3.14159265358979323846
+)
 
 struct App {
 mut:
 	gg    &gg.Context = 0
 	scale int = 10
 	cpu   chip8.CPU
+	phase u32
 }
 
 fn main() {
@@ -18,7 +25,9 @@ fn main() {
 	if os.args.len > 1 {
 		arg = os.args[1]
 	}
+
 	mut app := &App{}
+
 	app.gg = gg.new_context(
 		width: 640
 		height: 320
@@ -35,6 +44,12 @@ fn main() {
 	} else {
 		exit(0)
 	}
+	audio.setup(
+		sample_rate: 44100
+		num_channels: 1
+		stream_userdata_cb: audio_callback
+		user_data: app
+	)
 	app.gg.run()
 }
 
@@ -48,7 +63,7 @@ fn frame(mut app App) {
 			exit(0)
 		}
 	}
-	//Has to be updated every frame
+	// Has to be updated every frame
 	// if app.cpu.update_screen == true {
 	for y in 0 .. 32 {
 		for x in 0 .. 64 {
@@ -60,9 +75,30 @@ fn frame(mut app App) {
 		}
 	}
 	app.cpu.update_screen = false
+
 	//}
-	time.sleep(16 * time.millisecond)
+	time.sleep(2 * time.millisecond)
 	app.gg.end()
+}
+
+fn audio_callback(buffer &f32, num_frames int, num_channels int, mut app App) {
+	if app.cpu.sound_timer > 0 {
+		time := 0.0
+		for i := 0; i < 735; i += 1 {
+			unsafe {
+				mut soundbuffer := buffer
+				soundbuffer[i] = 0.5 * math.sinf(2.0 * math.pi * 440.0 * f32(time))
+				time += 1.0 / 44100
+			}
+		}
+	} else {
+		for i := 0; i < 735; i += 1 {
+			unsafe {
+				mut soundbuffer := buffer
+				soundbuffer[i] = -20
+			}
+		}
+	}
 }
 
 fn on_event(e &gg.Event, mut app App) {
@@ -77,6 +113,7 @@ fn (mut app App) key_down(key gg.KeyCode) {
 	state := byte(1)
 	match key {
 		.escape {
+			audio.shutdown()
 			exit(0)
 		}
 		._1 {
