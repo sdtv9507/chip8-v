@@ -7,9 +7,9 @@ Doesn't have audio yet.
 ### Standalone
 *OpenGL 3.3
 ```sh
-v chip8v.v
+v chip8v.v -cc gcc
 ```
-After compiling do
+After compiling run:
 ```sh
 chip8v path/to/my/rom
 ```
