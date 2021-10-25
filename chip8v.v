@@ -18,6 +18,7 @@ mut:
 	scale int = 10
 	cpu   chip8.CPU
 	phase u32
+	speed int = 16
 }
 
 fn main() {
@@ -77,7 +78,7 @@ fn frame(mut app App) {
 	app.cpu.update_screen = false
 
 	//}
-	time.sleep(2 * time.millisecond)
+	time.sleep(app.speed * time.millisecond)
 	app.gg.end()
 }
 
@@ -163,6 +164,16 @@ fn (mut app App) key_down(key gg.KeyCode) {
 		}
 		.v {
 			app.cpu.set_key(0xF, state)
+		}
+		.i {
+			if app.speed < 30 {
+				app.speed += 1
+			}
+		}
+		.o {
+			if app.speed > 1 {
+				app.speed -= 1
+			}
 		}
 		else {}
 	}
