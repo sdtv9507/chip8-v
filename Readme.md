@@ -13,6 +13,7 @@ After compiling run:
 ```sh
 chip8v path/to/my/rom
 ```
+use I and O to control speed.
 
 ### Libretro Core
 ```sh
