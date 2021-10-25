@@ -1,7 +1,11 @@
 module chip8
 
 import os
-import rand
+//import rand
+
+#include <stdlib.h>
+
+fn C.rand() int
 
 /*
 pub const font = [
@@ -292,7 +296,7 @@ pub fn (mut cpu CPU) interpret() bool {
 			jump = true
 		}
 		0xC000 {
-			num := rand.byte()
+			num := byte(C.rand() % 256)//rand.byte()
 			cpu.registers[reg_x] = num & byte(instruction & 0x00FF)
 		}
 		0xD000 {

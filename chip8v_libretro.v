@@ -147,7 +147,10 @@ pub fn retro_run() {
 	if core.cpu.keypad_wait == true {
 		core.cpu.wait_for_key()
 	} else {
-		core.cpu.interpret()
+		result := core.cpu.interpret()
+		if result == false {
+			exit(0)
+		}
 	}
 	if core.cpu.update_screen == true {
 		mut val := u32(0)
